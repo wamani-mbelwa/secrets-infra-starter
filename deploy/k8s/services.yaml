@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wli
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ordersvc
+  namespace: wli
+spec:
+  selector: { app: ordersvc }
+  ports: [{name: https, port: 443, targetPort: 8081}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ordersvc
+  namespace: wli
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: ordersvc } }
+  template:
+    metadata: { labels: { app: ordersvc } }
+    spec:
+      containers:
+        - name: ordersvc
+          image: wli/ordersvc:latest
+          ports: [{containerPort: 8081}]
+          env:
+            - name: SERVICE_NAME
+              value: ordersvc
+            - name: LISTEN_ADDR
+              value: ":8081"
+            - name: PEER_ALLOWED_ID
+              value: "spiffe://example.org/ns/wli/sa/paymentsvc"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paymentsvc
+  namespace: wli
+spec:
+  selector: { app: paymentsvc }
+  ports: [{name: https, port: 443, targetPort: 8082}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentsvc
+  namespace: wli
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: paymentsvc } }
+  template:
+    metadata: { labels: { app: paymentsvc } }
+    spec:
+      containers:
+        - name: paymentsvc
+          image: wli/paymentsvc:latest
+          ports: [{containerPort: 8082}]
+          env:
+            - name: SERVICE_NAME
+              value: paymentsvc
+            - name: LISTEN_ADDR
+              value: ":8082"
+            - name: ORDER_SVC
+              value: "https://ordersvc"

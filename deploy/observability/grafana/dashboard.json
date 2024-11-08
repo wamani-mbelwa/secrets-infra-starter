@@ -1,0 +1,13 @@
+{
+  "title": "WLI mTLS Lab",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "mtls_handshakes_total"
+    },
+    {
+      "type": "graph",
+      "title": "cert_rotation_events_total"
+    }
+  ]
+}

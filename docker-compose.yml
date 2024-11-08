@@ -1,0 +1,32 @@
+services:
+  ordersvc:
+    build:
+      context: .
+      dockerfile: deploy/docker/ordersvc.Dockerfile
+    environment:
+      - TLS_CERT_FILE=/app/certs/ordersvc.crt
+      - TLS_KEY_FILE=/app/certs/ordersvc.key
+      - TLS_CA_FILE=/app/certs/ca.crt
+      - SERVICE_NAME=ordersvc
+      - LISTEN_ADDR=:8081
+      - PEER_ALLOWED_ID=spiffe://example.org/ns/default/sa/paymentsvc
+      - METRICS_ADDR=:9101
+    ports:
+      - "8081:8081"
+      - "9101:9101"
+  paymentsvc:
+    build:
+      context: .
+      dockerfile: deploy/docker/paymentsvc.Dockerfile
+    environment:
+      - TLS_CERT_FILE=/app/certs/paymentsvc.crt
+      - TLS_KEY_FILE=/app/certs/paymentsvc.key
+      - TLS_CA_FILE=/app/certs/ca.crt
+      - SERVICE_NAME=paymentsvc
+      - LISTEN_ADDR=:8082
+      - PEER_ALLOWED_ID=spiffe://example.org/ns/default/sa/ordersvc
+      - METRICS_ADDR=:9102
+      - ORDER_SVC=https://ordersvc:8081
+    ports:
+      - "8082:8082"
+      - "9102:9102"
